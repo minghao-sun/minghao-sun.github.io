@@ -9,39 +9,55 @@ d3.csv('data/nutrition.csv').then(data => {
         d.fiber = +d.fiber;
         d.calcium = +d.calcium;
         d.copper = +d.copper;
-        d.irom = +d.irom;
+        d.iron = +d.irom;  // Assuming typo in the original CSV
     });
 
-    // Global settings
-    const svg = d3.select("#visualization").append("svg")
-        .attr("width", 800)
-        .attr("height", 600);
+    let currentScene = 0;
+    const scenes = [scene1, scene2, scene3];
 
-    const update = (sceneFunction) => {
-        svg.selectAll("*").remove(); // Clear previous contents
-        sceneFunction();
-    };
+    // Populate dropdown with food names
+    const foodSelect = d3.select("#food-select");
+    foodSelect.selectAll("option")
+        .data(data)
+        .enter().append("option")
+        .attr("value", d => d.name)
+        .text(d => d.name);
 
-    // Scene functions
-    function scene1() {
-        // Calorie comparison chart
+    d3.select("#next").on("click", () => {
+        currentScene = (currentScene + 1) % scenes.length;
+        updateScene();
+    });
+
+    d3.select("#prev").on("click", () => {
+        currentScene = (currentScene - 1 + scenes.length) % scenes.length;
+        updateScene();
+    });
+
+    function updateScene() {
+        d3.select("#visualization").html("");
+        scenes[currentScene](data);
+    }
+
+    function scene1(data) {
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
+
         const x = d3.scaleBand()
             .domain(data.map(d => d.name))
             .range([50, 750])
             .padding(0.2);
-        
+
         const y = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.calories)])
             .range([550, 50]);
-        
+
         svg.append("g")
             .attr("transform", "translate(0,550)")
-            .call(d3.axisBottom(x).tickFormat(d => d.substring(0, 10) + "..."))
+            .call(d3.axisBottom(x))
             .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)");
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "end");
 
         svg.append("g")
             .attr("transform", "translate(50,0)")
@@ -57,7 +73,7 @@ d3.csv('data/nutrition.csv').then(data => {
             .attr("fill", "steelblue")
             .append("title")
             .text(d => `${d.name}: ${d.calories} calories`);
-        
+
         svg.append("text")
             .attr("x", 400)
             .attr("y", 30)
@@ -66,76 +82,100 @@ d3.csv('data/nutrition.csv').then(data => {
             .text("Calorie Comparison Among Foods");
     }
 
-    function scene2() {
-        // Dropdown for food selection
-        const select = d3.select("body").append("select")
-            .attr("id", "foodSelect")
-            .on("change", function() {
-                updateNutritionalBreakdown(this.value);
-            });
-        
-        select.selectAll("option")
-            .data(data)
-            .enter().append("option")
-            .text(d => d.name)
-            .attr("value", d => d.name);
+    function scene2(data) {
+        const selectedFoodName = d3.select("#food-select").property("value");
+        const selectedFood = data.find(d => d.name === selectedFoodName);
 
-        function updateNutritionalBreakdown(foodName) {
-            const selectedFood = data.find(d => d.name === foodName);
-            const nutrients = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
-            const values = nutrients.map(n => selectedFood[n]);
+        const nutrients = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
+        const values = nutrients.map(n => selectedFood[n]);
 
-            const radarChart = RadarChart(svg, [values], {
-                w: 600, h: 600, levels: 5, roundStrokes: true,
-                color: d3.scaleOrdinal().range(["#AFC52F", "#2C93E8"]),
-                format: '.2f',
-                legend: { title: 'Nutritional Breakdown', translateX: 120, translateY: 40 },
-                unit: 'g'
-            });
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
 
-            svg.selectAll(".radarWrapper .radarStroke")
-                .data(values)
-                .attr("d", radarChart.update);
-        }
+        const x = d3.scaleBand()
+            .domain(nutrients)
+            .range([100, 700])
+            .padding(0.2);
 
-        updateNutritionalBreakdown(data[0].name);  // Initialize with first food
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(values)])
+            .range([550, 50]);
+
+        svg.append("g")
+            .attr("transform", "translate(0,550)")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .attr("transform", "translate(100,0)")
+            .call(d3.axisLeft(y));
+
+        svg.selectAll(".bar")
+            .data(values)
+            .enter().append("rect")
+            .attr("x", (d, i) => x(nutrients[i]))
+            .attr("y", d => y(d))
+            .attr("width", x.bandwidth())
+            .attr("height", d => 550 - y(d))
+            .attr("fill", "steelblue")
+            .append("title")
+            .text((d, i) => `${nutrients[i]}: ${d} g`);
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 30)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text(`Nutritional Breakdown: ${selectedFood.name}`);
     }
 
-    function scene3() {
-        // Similar to scene 2 but focusing on vitamins and minerals
-        const select = d3.select("body").append("select")
-            .attr("id", "foodSelectMinerals")
-            .on("change", function() {
-                updateMineralContent(this.value);
-            });
-        
-        select.selectAll("option")
-            .data(data)
-            .enter().append("option")
-            .text(d => d.name)
-            .attr("value", d => d.name);
+    function scene3(data) {
+        const selectedFoodName = d3.select("#food-select").property("value");
+        const selectedFood = data.find(d => d.name === selectedFoodName);
 
-        function updateMineralContent(foodName) {
-            const selectedFood = data.find(d => d.name === foodName);
-            const nutrients = ["calcium", "copper", "irom"];
-            const values = nutrients.map(n => selectedFood[n]);
+        const nutrients = ["calcium", "copper", "iron"];
+        const values = nutrients.map(n => selectedFood[n]);
 
-            // Visualization logic similar to scene2 for these minerals
-        }
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
 
-        updateMineralContent(data[0].name);  // Initialize with first food
+        const x = d3.scaleBand()
+            .domain(nutrients)
+            .range([100, 700])
+            .padding(0.2);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(values)])
+            .range([550, 50]);
+
+        svg.append("g")
+            .attr("transform", "translate(0,550)")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .attr("transform", "translate(100,0)")
+            .call(d3.axisLeft(y));
+
+        svg.selectAll(".bar")
+            .data(values)
+            .enter().append("rect")
+            .attr("x", (d, i) => x(nutrients[i]))
+            .attr("y", d => y(d))
+            .attr("width", x.bandwidth())
+            .attr("height", d => 550 - y(d))
+            .attr("fill", "steelblue")
+            .append("title")
+            .text((d, i) => `${nutrients[i]}: ${d} mg`);
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 30)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text(`Vitamin and Mineral Content: ${selectedFood.name}`);
     }
 
-    // Initial scene setup
-    update(scene1);  // Start with the first scene
-
-    // Navigation setup
-    d3.select("#next").on("click", () => {
-        let nextScene = (currentScene + 1) % scenes.length;
-        update(scenes[nextScene]);
-    });
-    d3.select("#prev").on("click", () => {
-        let prevScene = (currentScene - 1 + scenes.length) % scenes.length;
-        update(scenes[prevScene]);
-    });
+    // Initialize the first scene
+    updateScene();
 });
