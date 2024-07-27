@@ -12,13 +12,16 @@ d3.csv('data/nutrition.csv').then(data => {
         d.iron = +d.irom;  // Assuming typo in the original CSV
     });
 
+    // Select the top 10 foods
+    const top10Data = data.slice(0, 10);
+
     let currentScene = 0;
     const scenes = [scene1, scene2, scene3];
 
     // Populate dropdown with food names
     const foodSelect = d3.select("#food-select");
     foodSelect.selectAll("option")
-        .data(data)
+        .data(top10Data)
         .enter().append("option")
         .attr("value", d => d.name)
         .text(d => d.name);
@@ -35,7 +38,7 @@ d3.csv('data/nutrition.csv').then(data => {
 
     function updateScene() {
         d3.select("#visualization").html("");
-        scenes[currentScene](data);
+        scenes[currentScene](top10Data);
     }
 
     function scene1(data) {
