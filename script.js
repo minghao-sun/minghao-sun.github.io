@@ -1,56 +1,167 @@
-// Set up the scenes and parameters
-const scenes = [
-    { id: 'scene1', title: 'Scene 1', data: 'data/scene1.json' },
-    { id: 'scene2', title: 'Scene 2', data: 'data/scene2.json' },
-    { id: 'scene3', title: 'Scene 3', data: 'data/scene3.json' }
-];
+d3.csv('data/nutrition.csv').then(data => {
+    let currentScene = 0;
+    const scenes = [scene1, scene2, scene3];
 
-// Parameters and state variables
-let currentScene = scenes[0];
-
-// Initialize the visualization
-function init() {
-    d3.select('#scene1').on('click', () => loadScene(scenes[0]));
-    d3.select('#scene2').on('click', () => loadScene(scenes[1]));
-    d3.select('#scene3').on('click', () => loadScene(scenes[2]));
-
-    loadScene(currentScene);
-}
-
-// Load a scene
-function loadScene(scene) {
-    d3.json(scene.data).then(data => {
-        updateVisualization(data);
+    d3.select("#next").on("click", () => {
+        currentScene = (currentScene + 1) % scenes.length;
+        updateScene();
     });
-}
 
-// Update the visualization
-function updateVisualization(data) {
-    const svg = d3.select('#visualization')
-        .html('') // Clear previous content
-        .append('svg')
-        .attr('width', 800)
-        .attr('height', 600);
+    d3.select("#prev").on("click", () => {
+        currentScene = (currentScene - 1 + scenes.length) % scenes.length;
+        updateScene();
+    });
 
-    // Example of visualizing data as circles (you can customize this)
-    svg.selectAll('circle')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', d => d.x)
-        .attr('cy', d => 600 - d.y) // Invert y for better visual representation
-        .attr('r', d => d.value)
-        .attr('fill', 'steelblue');
+    function updateScene() {
+        d3.select("#visualization").html("");
+        scenes[currentScene](data);
+    }
 
-    // Example annotation (you can customize this)
-    svg.selectAll('text')
-        .data(data)
-        .enter()
-        .append('text')
-        .attr('x', d => d.x)
-        .attr('y', d => 600 - d.y - 10) // Place text above the circle
-        .text(d => `${d.name}: ${d.value}`);
-}
+    function scene1(data) {
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
 
-// Initialize the visualization on page load
-init();
+        // Convert data to numeric values
+        data.forEach(d => {
+            d.calories = +d.calories;
+            d.serving_size = +d.serving_size;
+        });
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.serving_size)])
+            .range([50, 750]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.calories)])
+            .range([550, 50]);
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("cx", d => x(d.serving_size))
+            .attr("cy", d => y(d.calories))
+            .attr("r", 5)
+            .style("fill", "steelblue");
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 30)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text("Calories vs Serving Size");
+
+        // Annotations
+        const highestCalorieFood = data.reduce((max, d) => d.calories > max.calories ? d : max, data[0]);
+        svg.append("text")
+            .attr("x", x(highestCalorieFood.serving_size))
+            .attr("y", y(highestCalorieFood.calories) - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .style("fill", "red")
+            .text(`Highest Calorie Food: ${highestCalorieFood.name}`);
+    }
+
+    function scene2(data) {
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
+
+        const selectedFood = data[1]; // Example: Select the second food item
+
+        const nutrientKeys = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
+        const nutrientValues = nutrientKeys.map(key => +selectedFood[key]);
+
+        const radarScale = d3.scaleLinear()
+            .domain([0, d3.max(nutrientValues)])
+            .range([0, 200]);
+
+        const radarLine = d3.lineRadial()
+            .angle((d, i) => i * 2 * Math.PI / nutrientKeys.length)
+            .radius(d => radarScale(d));
+
+        svg.append("g")
+            .attr("transform", "translate(400,300)")
+            .append("path")
+            .datum(nutrientValues)
+            .attr("d", radarLine)
+            .style("fill", "steelblue")
+            .style("opacity", 0.5);
+
+        nutrientKeys.forEach((key, i) => {
+            const angle = i * 2 * Math.PI / nutrientKeys.length;
+            svg.append("text")
+                .attr("x", 400 + Math.cos(angle) * 220)
+                .attr("y", 300 + Math.sin(angle) * 220)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .text(key);
+        });
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 30)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text(`Nutritional Breakdown: ${selectedFood.name}`);
+    }
+
+    function scene3(data) {
+        const svg = d3.select("#visualization").append("svg")
+            .attr("width", 800)
+            .attr("height", 600);
+
+        const comparisonFoods = [data[1], data[2]]; // Example: Select two food items for comparison
+
+        const nutrientKeys = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
+        const maxValues = nutrientKeys.map(key => d3.max(comparisonFoods, d => +d[key]));
+
+        const x0 = d3.scaleBand()
+            .domain(nutrientKeys)
+            .rangeRound([100, 700])
+            .paddingInner(0.1);
+
+        const x1 = d3.scaleBand()
+            .domain(comparisonFoods.map(d => d.name))
+            .rangeRound([0, x0.bandwidth()])
+            .padding(0.05);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(maxValues)])
+            .range([550, 50]);
+
+        svg.append("g")
+            .selectAll("g")
+            .data(comparisonFoods)
+            .enter().append("g")
+            .attr("transform", d => `translate(${x1(d.name)},0)`)
+            .selectAll("rect")
+            .data(d => nutrientKeys.map(key => ({ key, value: +d[key] })))
+            .enter().append("rect")
+            .attr("x", d => x0(d.key))
+            .attr("y", d => y(d.value))
+            .attr("width", x1.bandwidth())
+            .attr("height", d => 550 - y(d.value))
+            .style("fill", (d, i) => i % 2 === 0 ? "steelblue" : "orange");
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0,550)")
+            .call(d3.axisBottom(x0));
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(100,0)")
+            .call(d3.axisLeft(y));
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 30)
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text("Comparison of Nutritional Content");
+    }
+
+    // Initialize the first scene
+    updateScene();
+});
