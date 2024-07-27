@@ -230,6 +230,10 @@
                 .attr("transform", "translate(100,0)")
                 .call(d3.axisLeft(y));
 
+            const color = d3.scaleOrdinal()
+                .domain(nutrients)
+                .range(d3.schemeCategory10);
+
             svg.selectAll(".bar")
                 .data(values)
                 .enter().append("rect")
@@ -237,7 +241,7 @@
                 .attr("y", d => y(d))
                 .attr("width", x.bandwidth())
                 .attr("height", d => 550 - y(d))
-                .attr("fill", "steelblue")
+                .attr("fill", (d, i) => color(nutrients[i]))
                 .append("title")
                 .text((d, i) => `${nutrients[i]}: ${d} mg`);
 
@@ -258,7 +262,7 @@
                 .attr("x", 650)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", "steelblue");
+                .style("fill", (d, i) => color(nutrients[i]));
 
             legend.append("text")
                 .attr("x", 670)
