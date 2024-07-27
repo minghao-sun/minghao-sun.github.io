@@ -1,8 +1,27 @@
 d3.csv('data/nutrition.csv').then(data => {
+    // Convert data to numeric values where appropriate
+    data.forEach(d => {
+        d.calories = parseFloat(d.calories);
+        d.serving_size = parseFloat(d.serving_size);
+        d.total_fat = parseFloat(d.total_fat);
+        d.protein = parseFloat(d.protein);
+        d.carbohydrate = parseFloat(d.carbohydrate);
+        d.fiber = parseFloat(d.fiber);
+        d.sugars = parseFloat(d.sugars);
+    });
+
     console.log("Data loaded:", data); // Debugging line
 
     let currentScene = 0;
     const scenes = [scene1, scene2, scene3];
+
+    // Populate dropdown with food names
+    const foodSelect = d3.select("#food-select");
+    foodSelect.selectAll("option")
+        .data(data)
+        .enter().append("option")
+        .attr("value", d => d.name)
+        .text(d => d.name);
 
     d3.select("#next").on("click", () => {
         currentScene = (currentScene + 1) % scenes.length;
@@ -23,12 +42,6 @@ d3.csv('data/nutrition.csv').then(data => {
         const svg = d3.select("#visualization").append("svg")
             .attr("width", 800)
             .attr("height", 600);
-
-        // Convert data to numeric values
-        data.forEach(d => {
-            d.calories = parseFloat(d.calories);
-            d.serving_size = parseFloat(d.serving_size);
-        });
 
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.serving_size)])
@@ -69,7 +82,8 @@ d3.csv('data/nutrition.csv').then(data => {
             .attr("width", 800)
             .attr("height", 600);
 
-        const selectedFood = data[1]; // Example: Select the second food item
+        const selectedFoodName = d3.select("#food-select").property("value");
+        const selectedFood = data.find(d => d.name === selectedFoodName);
 
         const nutrientKeys = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
         const nutrientValues = nutrientKeys.map(key => parseFloat(selectedFood[key]));
