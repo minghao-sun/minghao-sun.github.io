@@ -22,7 +22,7 @@
     <div id="visualization"></div>
     <div id="controls">
         <button id="prev">Previous</button>
-        <select id="food-select"></select>
+        <select id="food-select" style="display: none;"></select>
         <button id="next">Next</button>
     </div>
     <script>
@@ -61,10 +61,19 @@
             updateScene();
         });
 
-        foodSelect.on("change", updateScene);
+        foodSelect.on("change", () => {
+            if (currentScene === 1 || currentScene === 2) {
+                updateScene();
+            }
+        });
 
         function updateScene() {
             d3.select("#visualization").html("");
+            if (currentScene === 1 || currentScene === 2) {
+                foodSelect.style("display", "inline");
+            } else {
+                foodSelect.style("display", "none");
+            }
             scenes[currentScene](data);
         }
 
