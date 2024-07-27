@@ -1,0 +1,8 @@
+[
+    { "model": "Car A", "fuel_efficiency": 30, "x": 50, "y": 300, "value": 30 },
+    { "model": "Car B", "fuel_efficiency": 25, "x": 150, "y": 250, "value": 25 },
+    { "model": "Car C", "fuel_efficiency": 20, "x": 250, "y": 200, "value": 20 }
+]
+
+
+

@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+#nav {
+    margin-bottom: 20px;
+}
+
+#visualization {
+    width: 800px;
+    height: 600px;
+    border: 1px solid #ccc;
+}
+
+
+
+
+
