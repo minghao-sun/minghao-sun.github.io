@@ -61,6 +61,8 @@
             updateScene();
         });
 
+        foodSelect.on("change", updateScene);
+
         function updateScene() {
             d3.select("#visualization").html("");
             scenes[currentScene](data);
@@ -119,39 +121,42 @@
 
             const svg = d3.select("#visualization").append("svg")
                 .attr("width", 800)
-                .attr("height", 600);
+                .attr("height", 600)
+                .append("g")
+                .attr("transform", "translate(400,300)");
 
-            const x = d3.scaleBand()
+            const color = d3.scaleOrdinal()
                 .domain(nutrients)
-                .range([100, 700])
-                .padding(0.2);
+                .range(d3.schemeCategory10);
 
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(values)])
-                .range([550, 50]);
+            const pie = d3.pie()
+                .value((d, i) => values[i])
+                .sort(null);
 
-            svg.append("g")
-                .attr("transform", "translate(0,550)")
-                .call(d3.axisBottom(x));
+            const arc = d3.arc()
+                .innerRadius(0)
+                .outerRadius(200);
 
-            svg.append("g")
-                .attr("transform", "translate(100,0)")
-                .call(d3.axisLeft(y));
+            const arcs = svg.selectAll("arc")
+                .data(pie(nutrients))
+                .enter().append("g")
+                .attr("class", "arc");
 
-            svg.selectAll(".bar")
-                .data(values)
-                .enter().append("rect")
-                .attr("x", (d, i) => x(nutrients[i]))
-                .attr("y", d => y(d))
-                .attr("width", x.bandwidth())
-                .attr("height", d => 550 - y(d))
-                .attr("fill", "steelblue")
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", (d, i) => color(d.data))
                 .append("title")
-                .text((d, i) => `${nutrients[i]}: ${d} g`);
+                .text((d, i) => `${nutrients[i]}: ${values[i]} g`);
+
+            arcs.append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .attr("dy", "0.35em")
+                .style("text-anchor", "middle")
+                .text((d, i) => nutrients[i]);
 
             svg.append("text")
-                .attr("x", 400)
-                .attr("y", 30)
+                .attr("x", 0)
+                .attr("y", -220)
                 .attr("text-anchor", "middle")
                 .style("font-size", "24px")
                 .text(`Nutritional Breakdown: ${selectedFood.name}`);
@@ -161,7 +166,7 @@
             const selectedFoodName = d3.select("#food-select").property("value");
             const selectedFood = data.find(d => d.name === selectedFoodName);
 
-            const nutrients = ["calcium", "copper", "iron"];
+            const nutrients = ["vitamin_a", "calcium", "copper", "iron"];
             const values = nutrients.map(n => selectedFood[n]);
 
             const svg = d3.select("#visualization").append("svg")
@@ -204,7 +209,7 @@
                 .text(`Vitamin and Mineral Content: ${selectedFood.name}`);
         }
 
-        updateScene();
+        updateScene();  // Initial call to display the first scene
     </script>
 </body>
 </html>
