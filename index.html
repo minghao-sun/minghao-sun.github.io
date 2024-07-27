@@ -16,6 +16,14 @@
         svg {
             font-family: Arial, sans-serif;
         }
+        .legend {
+            font-size: 12px;
+            fill: black;
+        }
+        .annotation {
+            fill: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -26,7 +34,6 @@
         <button id="next">Next</button>
     </div>
     <script>
-        // Nutrition data for the top 10 foods
         const data = [
             {"name": "Cornstarch", "calories": 381, "total_fat": 0.1, "protein": 0.26, "carbohydrate": 91.27, "fiber": 0.9, "sugars": 0, "calcium": 2, "copper": 0.05, "iron": 0.47},
             {"name": "Nuts, pecans", "calories": 691, "total_fat": 72, "protein": 9.17, "carbohydrate": 13.86, "fiber": 9.6, "sugars": 3.97, "calcium": 70, "copper": 1.2, "iron": 2.53},
@@ -43,7 +50,6 @@
         let currentScene = 0;
         const scenes = [scene1, scene2, scene3];
 
-        // Populate dropdown with food names
         const foodSelect = d3.select("#food-select");
         foodSelect.selectAll("option")
             .data(data)
@@ -119,6 +125,12 @@
                 .attr("text-anchor", "middle")
                 .style("font-size", "24px")
                 .text("Calorie Comparison Among Foods");
+
+            svg.append("text")
+                .attr("x", x(data[1].name))
+                .attr("y", y(data[1].calories) - 10)
+                .attr("class", "annotation")
+                .text("Highest Calorie Food: Nuts, pecans");
         }
 
         function scene2(data) {
@@ -169,6 +181,25 @@
                 .attr("text-anchor", "middle")
                 .style("font-size", "24px")
                 .text(`Nutritional Breakdown: ${selectedFood.name}`);
+
+            const legend = svg.selectAll(".legend")
+                .data(nutrients)
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", (d, i) => `translate(-100, ${i * 20 - 200})`);
+
+            legend.append("rect")
+                .attr("x", 400)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", color);
+
+            legend.append("text")
+                .attr("x", 420)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "start")
+                .text(d => d);
         }
 
         function scene3(data) {
@@ -216,6 +247,25 @@
                 .attr("text-anchor", "middle")
                 .style("font-size", "24px")
                 .text(`Vitamin and Mineral Content: ${selectedFood.name}`);
+
+            const legend = svg.selectAll(".legend")
+                .data(nutrients)
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+            legend.append("rect")
+                .attr("x", 650)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", "steelblue");
+
+            legend.append("text")
+                .attr("x", 670)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "start")
+                .text(d => d);
         }
 
         updateScene();  // Initial call to display the first scene
