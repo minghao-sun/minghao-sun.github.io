@@ -1,8 +1,0 @@
-[
-    { "name": "Cornstarch", "serving_size": "100 g", "calcium": "2.00 mg", "iron": "0.47 mg", "x": 50, "y": 2, "value": 0.47 },
-    { "name": "Nuts, pecans", "serving_size": "100 g", "calcium": "70.00 mg", "iron": "2.53 mg", "x": 150, "y": 70, "value": 2.53 },
-    { "name": "Eggplant, raw", "serving_size": "100 g", "calcium": "9.00 mg", "iron": "0.23 mg", "x": 250, "y": 9, "value": 0.23 },
-    { "name": "Teff, uncooked", "serving_size": "100 g", "calcium": "180.00 mg", "iron": "7.63 mg", "x": 350, "y": 180, "value": 7.63 },
-    { "name": "Sherbet, orange", "serving_size": "100 g", "calcium": "54.00 mg", "iron": "0.14 mg", "x": 450, "y": 54, "value": 0.14 },
-    { "name": "Cauliflower, raw", "serving_size": "100 g", "calcium": "22.00 mg", "iron": "0.42 mg", "x": 550, "y": 22, "value": 0.42 }
-]
