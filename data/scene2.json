@@ -1,8 +1,10 @@
 [
-    { "model": "Car A", "fuel_efficiency": 30, "x": 50, "y": 300, "value": 30 },
-    { "model": "Car B", "fuel_efficiency": 25, "x": 150, "y": 250, "value": 25 },
-    { "model": "Car C", "fuel_efficiency": 20, "x": 250, "y": 200, "value": 20 }
+    { "name": "Cornstarch", "serving_size": "100 g", "vitamin_a": "0.00 IU", "vitamin_c": "0.0 mg", "x": 50, "y": 0, "value": 0 },
+    { "name": "Nuts, pecans", "serving_size": "100 g", "vitamin_a": "56.00 IU", "vitamin_c": "1.1 mg", "x": 150, "y": 56, "value": 1 },
+    { "name": "Eggplant, raw", "serving_size": "100 g", "vitamin_a": "23.00 IU", "vitamin_c": "2.2 mg", "x": 250, "y": 23, "value": 2 },
+    { "name": "Teff, uncooked", "serving_size": "100 g", "vitamin_a": "9.00 IU", "vitamin_c": "0.0 mg", "x": 350, "y": 9, "value": 0 },
+    { "name": "Sherbet, orange", "serving_size": "100 g", "vitamin_a": "46.00 IU", "vitamin_c": "2.3 mg", "x": 450, "y": 46, "value": 2 },
+    { "name": "Cauliflower, raw", "serving_size": "100 g", "vitamin_a": "0.00 IU", "vitamin_c": "48.2 mg", "x": 550, "y": 0, "value": 48 }
 ]
-
 
 

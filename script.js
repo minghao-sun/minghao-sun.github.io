@@ -38,15 +38,18 @@ function updateVisualization(data) {
         .enter()
         .append('circle')
         .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
+        .attr('cy', d => 600 - d.y) // Invert y for better visual representation
         .attr('r', d => d.value)
         .attr('fill', 'steelblue');
 
     // Example annotation (you can customize this)
-    svg.append('text')
-        .attr('x', 10)
-        .attr('y', 20)
-        .text('Example annotation');
+    svg.selectAll('text')
+        .data(data)
+        .enter()
+        .append('text')
+        .attr('x', d => d.x)
+        .attr('y', d => 600 - d.y - 10) // Place text above the circle
+        .text(d => `${d.name}: ${d.value}`);
 }
 
 // Initialize the visualization on page load
