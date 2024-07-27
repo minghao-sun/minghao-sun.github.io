@@ -19,3 +19,8 @@ button {
     font-size: 16px;
     margin: 0 10px;
 }
+
+select {
+    padding: 10px;
+    font-size: 16px;
+}

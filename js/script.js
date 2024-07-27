@@ -57,7 +57,32 @@ d3.csv('data/nutrition.csv').then(data => {
             .attr("cx", d => x(d.serving_size))
             .attr("cy", d => y(d.calories))
             .attr("r", 5)
-            .style("fill", "steelblue");
+            .style("fill", "steelblue")
+            .append("title")
+            .text(d => `${d.name}\nCalories: ${d.calories}\nServing Size: ${d.serving_size}g`);
+
+        svg.append("g")
+            .attr("transform", "translate(0,550)")
+            .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format(".0f")));
+
+        svg.append("g")
+            .attr("transform", "translate(50,0)")
+            .call(d3.axisLeft(y).ticks(10).tickFormat(d3.format(".0f")));
+
+        svg.append("text")
+            .attr("x", 400)
+            .attr("y", 580)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Serving Size (g)");
+
+        svg.append("text")
+            .attr("x", -300)
+            .attr("y", 20)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Calories");
 
         svg.append("text")
             .attr("x", 400)
