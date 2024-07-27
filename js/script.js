@@ -1,4 +1,6 @@
 d3.csv('data/nutrition.csv').then(data => {
+    console.log("Data loaded:", data); // Debugging line
+
     let currentScene = 0;
     const scenes = [scene1, scene2, scene3];
 
@@ -24,8 +26,8 @@ d3.csv('data/nutrition.csv').then(data => {
 
         // Convert data to numeric values
         data.forEach(d => {
-            d.calories = +d.calories;
-            d.serving_size = +d.serving_size;
+            d.calories = parseFloat(d.calories);
+            d.serving_size = parseFloat(d.serving_size);
         });
 
         const x = d3.scaleLinear()
@@ -70,7 +72,10 @@ d3.csv('data/nutrition.csv').then(data => {
         const selectedFood = data[1]; // Example: Select the second food item
 
         const nutrientKeys = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
-        const nutrientValues = nutrientKeys.map(key => +selectedFood[key]);
+        const nutrientValues = nutrientKeys.map(key => parseFloat(selectedFood[key]));
+
+        console.log("Selected Food:", selectedFood); // Debugging line
+        console.log("Nutrient Values:", nutrientValues); // Debugging line
 
         const radarScale = d3.scaleLinear()
             .domain([0, d3.max(nutrientValues)])
@@ -114,7 +119,7 @@ d3.csv('data/nutrition.csv').then(data => {
         const comparisonFoods = [data[1], data[2]]; // Example: Select two food items for comparison
 
         const nutrientKeys = ["protein", "total_fat", "carbohydrate", "fiber", "sugars"];
-        const maxValues = nutrientKeys.map(key => d3.max(comparisonFoods, d => +d[key]));
+        const maxValues = nutrientKeys.map(key => d3.max(comparisonFoods, d => parseFloat(d[key])));
 
         const x0 = d3.scaleBand()
             .domain(nutrientKeys)
@@ -136,7 +141,7 @@ d3.csv('data/nutrition.csv').then(data => {
             .enter().append("g")
             .attr("transform", d => `translate(${x1(d.name)},0)`)
             .selectAll("rect")
-            .data(d => nutrientKeys.map(key => ({ key, value: +d[key] })))
+            .data(d => nutrientKeys.map(key => ({ key, value: parseFloat(d[key]) })))
             .enter().append("rect")
             .attr("x", d => x0(d.key))
             .attr("y", d => y(d.value))
